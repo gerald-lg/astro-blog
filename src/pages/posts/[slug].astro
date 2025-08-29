@@ -1,0 +1,79 @@
+---
+import { Formatter } from "@utils/formatter";
+import type { GetStaticPaths } from "astro";
+import Image from "astro/components/Image.astro";
+import { getEntry } from "astro:content";
+import { getCollection } from "astro:content";
+import BlogLayout from "src/layouts/BlogLayout.astro";
+
+export const getStaticPaths = (async () => {
+
+    const posts = await getCollection('blog');
+
+    return posts.map((post) => ({
+        params: {
+            slug: post.slug
+        },
+        props: { ...post }
+    }))
+    
+}) satisfies GetStaticPaths;
+
+const { data, render } = Astro.props;
+
+// const authors = await getCollection('author');
+// const authorInfo = authors.find(author => author.data.name.toLowerCase().replace(' ', '-') === data.author.id);
+const authorEntry = await getEntry('author', data.author.id);
+const authorInfo = authorEntry ? authorEntry.data : { avatar: '', name: 'Unknown' };
+
+const { Content, headings } = await render();
+---
+<BlogLayout title={data.title}>
+    <div class="text-sm text-gray-500 mb-0">{data.title}</div>
+    <!-- <h4 class="text-md text-gray-400 mb-0">{authorInfo?.data.name}</h4> -->
+    
+    <div class="flex flex-row flex-wrap items-center mt-2">
+        <Image
+            src={authorInfo?.avatar}
+            alt={authorInfo?.name}
+            width={50}
+            height={50}
+            class="rounded-full"
+        />
+        <div class="flex flex-col ml-5">
+            <a href={`/blog/${data.author.id}`} class="text-md text-gray-400 mb-0">{authorInfo?.name}</a>
+            <span class="text-sm text-gray-500">{ Formatter.formatDate(data.date)}</span>
+        </div>
+    </div>
+
+    <Image
+        src={data.image}
+        width={600}
+        height={220}
+        alt={data.title}
+        class="object-cover w-full h-[300px] my-5 rounded-md"
+        transition:name={`img-${data.title}`}
+        quality="high"
+    />
+
+    <h3>Tabla de contenidos</h3>
+    <ol>
+        {
+            headings.map((heading, index) => (
+                <li>
+                    <a href={`#${heading.slug}`}>
+                        {index + 1}. {heading.text}
+                    </a>
+                </li>
+            ))
+        }
+    </ol>
+
+    <!-- Contenido -->
+    <Content />
+
+    <div class="mt-50">
+        <a href="#btn-back" class="text-gray-300 hover:underline">Ir arriba</a>
+    </div>
+    
+</BlogLayout>
