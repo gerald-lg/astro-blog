@@ -17,8 +17,16 @@ const { title = "Blog" } = Astro.props;
 		<meta name="viewport" content="width=device-width" />
 		<meta name="generator" content={Astro.generator} />
 		<title>{title}</title>
-
+		
 		<ClientRouter />
+
+		<!-- RSS Feed -->
+		<link
+				rel="alternate"
+				type="application/rss+xml"
+				title="Gerald's Blog"
+				href={new URL("rss.xml", Astro.site)}
+		/>
 	</head>
 	<body class="bg-gray-900">
 		<main class="mb-10 max-w-5xl m-auto px-2 py-2">
